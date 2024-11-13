@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hourly Weather Data</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Hourly Weather Data</h1>
+
+    <canvas id="combinedChart" width="400" height="200"></canvas>
+
+    <script>
+        // Data z Flasku - teplota, vlhkost a rychlost větru
+        const hourlyData = JSON.parse('{{ hourly_data | tojson | safe }}')
+
+        // Limit data to 24 hours
+        const temperatureData = hourlyData.temperature.slice(0, 24);
+        const humidityData = hourlyData.humidity.slice(0, 24);
+        const windSpeedData = hourlyData.wind_speed.slice(0, 24);
+
+        // Generování štítků pro 24 hodin (např. 0:00, 1:00, ... 23:00)
+        const labels = Array.from({ length: 24 }, (_, i) => `${i}:00`);
+
+        // Konfigurace pro graf se všemi křivkami
+        const combinedData = {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Temperature (°C)',
+                    data: temperatureData,
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1,
+                    yAxisID: 'y',
+                    cubicInterpolationMode: 'monotone'
+                },
+                {
+                    label: 'Humidity (%)',
+                    data: humidityData,
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1,
+                    yAxisID: 'y1',
+                    cubicInterpolationMode: 'monotone'
+                },
+                {
+                    label: 'Wind Speed (m/s)',
+                    data: windSpeedData,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1,
+                    yAxisID: 'y2',
+                    cubicInterpolationMode: 'monotone'
+                }
+            ]
+        };
+
+        const config = {
+            type: 'line',
+            data: combinedData,
+            options: {
+                animation: false,
+                scales: {
+                    y: {
+                        type: 'linear',
+                        position: 'left',
+                        title: {
+                            display: true,
+                            text: 'Temperature (°C)'
+                        }
+                    },
+                    y1: {
+                        type: 'linear',
+                        position: 'right',
+                        title: {
+                            display: true,
+                            text: 'Humidity (%)'
+                        },
+                        grid: {
+                            drawOnChartArea: false  // Only one grid will be shown on the left Y axis
+                        }
+                    },
+                    y2: {
+                        type: 'linear',
+                        position: 'right',
+                        title: {
+                            display: true,
+                            text: 'Wind Speed (m/s)'
+                        },
+                        grid: {
+                            drawOnChartArea: false  // Only one grid will be shown on the left Y axis
+                        }
+                    }
+                }
+            }
+        };
+
+        // Vytvoření jednoho kombinovaného grafu
+        const combinedChart = new Chart(
+            document.getElementById('combinedChart'),
+            config
+        );
+    </script>
+</body>
+</html>
